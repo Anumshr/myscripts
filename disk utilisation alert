@@ -1,0 +1,34 @@
+#!/bin/bash
+
+df -hP | awk '{print$5}' | sed 's/%/''/' > util
+df -hP | awk '{print$6}' > files
+df -hP | awk '{print $5 "    "  $6 }' > diskutilfile
+
+declare -a my_util
+declare -a my_file
+declare -a diskutilfile
+
+mapfile -t my_file < files
+mapfile -t my_util < util
+mapfile -t diskutilfile < diskutilfile
+
+subject="Severe disk utilisation alret"
+
+len=${#my_file[@]}
+#this is to clear the sample 3, 1 to 8th cloumn every time the script runs so that new value of utilisationcan take place
+sed '1,8 d' sample3
+
+echo "High disk utilisation alert . please raise a request
+below are the details: " > sample3
+
+for ((i=1; i<=$len ;i++))
+do
+  if(( my_util[$i] >80 ))
+  then
+      echo "${diskutilfile[$i]}" >> sample3
+  fi
+ done
+ # enter the mail id in the emailid filed
+ mailx -s "$subject" "emailid" <sample3
+ 
+ 
